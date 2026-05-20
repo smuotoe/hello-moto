@@ -1,4 +1,4 @@
 {
-  "signature": "hello_moto/__init__.py|hello_moto/main.py|pyproject.toml|requirements.txt::Unresolved from this turn — hello_moto/main.py:\n🔴 STOP — 1 issue(s) must be fixed:\n  Import \"cv2\" could not be resolved",
-  "sessionId": "lens-mpdz8qml-97991214"
+  "signature": "hello_moto/face_detector.py::Unresolved from this turn — hello_moto/face_detector.py:\n🔴 STOP — 1 issue(s) must be fixed:\n  Import \"cv2\" could not be resolved",
+  "sessionId": "lens-mpdyn7nj-42953ccb"
 }

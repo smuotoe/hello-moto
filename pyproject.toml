@@ -7,10 +7,7 @@ name = "hello-moto"
 version = "0.1.0"
 description = "Plays Hello Moto sound when a face is detected"
 requires-python = ">=3.10"
-dependencies = [
-    "reachy-mini",
-    "opencv-python-headless",
-]
+dependencies = ["reachy-mini", "opencv-python-headless"]
 
 [project.entry-points."reachy_mini_apps"]
 hello_moto = "hello_moto.main:HelloMotoApp"
