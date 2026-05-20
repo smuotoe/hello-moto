@@ -1,0 +1,2 @@
+reachy-mini
+opencv-python-headless
