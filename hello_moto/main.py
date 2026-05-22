@@ -10,8 +10,7 @@ from hello_moto.face_detector import FaceDetector
 from hello_moto.greeting_controller import GreetingController
 
 if TYPE_CHECKING:
-    from reachy_mini import ReachyMini
-    from reachy_mini.apps import ReachyMiniApp
+    from reachy_mini import ReachyMini, ReachyMiniApp
 
 logger = logging.getLogger("reachy_mini.app")
 
@@ -38,8 +37,7 @@ class HelloMotoApp:
         logger.info("Hello Moto app starting...")
 
         # Lazy import: reachy_mini only available on CM4
-        from reachy_mini import ReachyMini
-        from reachy_mini.apps import ReachyMiniApp
+        from reachy_mini import ReachyMini, ReachyMiniApp
 
         # Verify we're a proper ReachyMiniApp subclass
         if not isinstance(self, ReachyMiniApp):
