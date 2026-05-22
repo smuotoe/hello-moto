@@ -1,6 +1,72 @@
 {
-  "files": {},
+  "files": {
+    "tests/test_greeting_controller.py": {
+      "modifiedRanges": [
+        {
+          "start": 1,
+          "end": 104
+        }
+      ],
+      "importsChanged": true,
+      "lastEdit": "2026-05-22T11:08:59.604Z"
+    },
+    "hello_moto/greeting_controller.py": {
+      "modifiedRanges": [
+        {
+          "start": 1,
+          "end": 79
+        }
+      ],
+      "importsChanged": true,
+      "lastEdit": "2026-05-22T11:08:43.317Z"
+    },
+    "hello_moto/main.py": {
+      "modifiedRanges": [
+        {
+          "start": 1,
+          "end": 83
+        }
+      ],
+      "importsChanged": true,
+      "lastEdit": "2026-05-22T11:11:53.099Z"
+    },
+    "tests/test_hello_moto_app.py": {
+      "modifiedRanges": [
+        {
+          "start": 1,
+          "end": 28
+        }
+      ],
+      "importsChanged": false,
+      "lastEdit": "2026-05-22T11:10:32.957Z"
+    },
+    "hello_moto/face_detector.py": {
+      "modifiedRanges": [
+        {
+          "start": 29,
+          "end": 29
+        },
+        {
+          "start": 35,
+          "end": 37
+        }
+      ],
+      "importsChanged": false,
+      "lastEdit": "2026-05-22T11:10:32.962Z"
+    },
+    "tests/test_face_detector.py": {
+      "modifiedRanges": [
+        {
+          "start": 23,
+          "end": 29
+        }
+      ],
+      "importsChanged": false,
+      "lastEdit": "2026-05-22T11:12:05.715Z"
+    }
+  },
   "turnCycles": 0,
   "maxCycles": 3,
-  "lastUpdated": "2026-05-20T11:44:19.279Z"
+  "lastUpdated": "2026-05-22T11:12:05.715Z",
+  "sessionId": "lens-mpgti578-0c6e614f"
 }

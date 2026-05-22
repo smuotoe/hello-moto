@@ -20,6 +20,13 @@ def test_no_face_returns_false(detector):
     assert center is None
 
 
+def test_none_frame_returns_false(detector):
+    """A None frame should not crash detect() and return no face."""
+    has_face, center = detector.detect(None)
+    assert has_face is False
+    assert center is None
+
+
 def test_face_detected_large_enough(monkeypatch, detector):
     # Simulate a 200x200 face in a 640x480 frame
     frame = np.zeros((480, 640, 3), dtype=np.uint8)

@@ -26,12 +26,15 @@ class FaceDetector:
         """Detect a face in a BGR frame from the camera.
 
         Args:
-            frame: BGR image from mini.media.get_frame().
+            frame: BGR image from mini.media.get_frame() (or None if corrupt).
 
         Returns:
             (has_face, face_center_or_None). Face center is (x, y) in pixels.
             Bounding box must be >= 20x20 to count.
         """
+        # Guard against corrupt or missing frames
+        if frame is None or frame.size == 0:
+            return False, None
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = self._run_cascade(gray)
 
