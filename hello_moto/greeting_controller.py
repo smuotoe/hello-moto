@@ -25,6 +25,7 @@ class GreetingController:
         self._on_greet: Callable[[], None] = lambda: None
         self._cooldown_start = 0.0
         self._sound_duration = sound_duration
+        self._triggering = False  # re-entrancy guard
 
     def set_on_greet(self, callback: Callable[[], None]) -> None:
         """Set the callback to invoke when a greeting should play."""
@@ -43,9 +44,9 @@ class GreetingController:
             if time.time() - self._cooldown_start >= COOLDOWN_SECONDS:
                 logger.info("Cooldown ended, resuming detection")
                 self._state = "idle"
+                return  # Don't process this frame, wait for next one
             else:
                 return
-            # Fall through to process the current frame as idle
 
         if has_face:
             logger.info("Face detected, greeting!")
@@ -59,9 +60,17 @@ class GreetingController:
 
     def _trigger_greeting(self) -> None:
         """Fire the greeting callback, enter playback state, schedule cooldown."""
-        self._state = "playing"
-        self._on_greet()
-        # Schedule cooldown after sound finishes (daemon to not block shutdown)
-        timer = threading.Timer(self._sound_duration, self.finish_playback)
-        timer.daemon = True
-        timer.start()
+        if self._triggering:
+            return  # Already in the process of triggering
+        self._triggering = True
+        try:
+            if self._state == "playing":
+                return  # Guard against double-fire
+            self._state = "playing"
+            self._on_greet()
+            # Schedule cooldown after sound finishes (daemon to not block shutdown)
+            timer = threading.Timer(self._sound_duration, self.finish_playback)
+            timer.daemon = True
+            timer.start()
+        finally:
+            self._triggering = False
