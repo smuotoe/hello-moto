@@ -1,4 +1,4 @@
 {
-  "signature": "hello_moto/face_detector.py::Unresolved from this turn — hello_moto/face_detector.py:\n🔴 STOP — 1 issue(s) must be fixed:\n  Import \"cv2\" could not be resolved",
-  "sessionId": "lens-mpdyn7nj-42953ccb"
+  "signature": "hello_moto/face_detector.py::Unresolved from this turn — hello_moto/face_detector.py:\n🔴 STOP — 1 issue(s) must be fixed:\n  L12: Import \"mediapipe\" could not be resolved",
+  "sessionId": "lens-mpgsupg5-fa52b7f7"
 }

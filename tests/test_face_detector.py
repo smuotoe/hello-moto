@@ -1,6 +1,5 @@
-"""Tests for FaceDetector."""
+"""Tests for FaceDetector (MediaPipe-based)."""
 
-import cv2
 import numpy as np
 import pytest
 
@@ -13,7 +12,7 @@ def detector():
 
 
 def test_no_face_returns_false(detector):
-    # 640x480 BGR frame with no face
+    """A blank frame should return no face."""
     frame = np.zeros((480, 640, 3), dtype=np.uint8)
     has_face, center = detector.detect(frame)
     assert has_face is False
@@ -27,24 +26,35 @@ def test_none_frame_returns_false(detector):
     assert center is None
 
 
-def test_face_detected_large_enough(monkeypatch, detector):
-    # Simulate a 200x200 face in a 640x480 frame
+def test_empty_frame_returns_false(detector):
+    """An empty frame should return no face."""
+    has_face, center = detector.detect(np.array([], dtype=np.uint8))
+    assert has_face is False
+    assert center is None
+
+
+def test_mediapipe_detection_patched(monkeypatch, detector):
+    """Simulate MediaPipe finding a face by patching _run_mediapipe."""
     frame = np.zeros((480, 640, 3), dtype=np.uint8)
 
-    # Patch _run_cascade to return a face
-    mock_faces = np.array([[200, 100, 200, 200]], dtype=np.int32)
-    monkeypatch.setattr(detector, "_run_cascade", lambda gray: mock_faces)
+    class MockBBox:
+        xmin = 0.3
+        ymin = 0.2
+        width = 0.25
+        height = 0.3
+
+    class MockLocationData:
+        relative_bounding_box = MockBBox()
+
+    class MockDetection:
+        location_data = MockLocationData()
+
+    class MockResults:
+        detections = [MockDetection()]
+
+    monkeypatch.setattr(detector, "_run_mediapipe", lambda rgb: MockResults())
 
     has_face, center = detector.detect(frame)
     assert has_face is True
-    assert center == (300, 200)
-
-
-def test_face_too_small_ignored(monkeypatch, detector):
-    frame = np.zeros((480, 640, 3), dtype=np.uint8)
-    mock_faces = np.array([[100, 100, 10, 10]], dtype=np.int32)
-    monkeypatch.setattr(detector, "_run_cascade", lambda gray: mock_faces)
-
-    has_face, center = detector.detect(frame)
-    assert has_face is False
-    assert center is None
+    # Center of bbox at relative (0.3+0.125, 0.2+0.15) * (640, 480)
+    assert center == (272, 168)

@@ -6,6 +6,14 @@
 
 **Architecture:** Restructure existing `main.py` into a proper `ReachyMiniApp` subclass with `FaceDetector` (OpenCV Haar cascade) and `GreetingController` (consecutive-frame threshold + cooldown) as focused components. Uses `mini.media.play_sound()` instead of manual sample pushing.
 
+**Decisions from review (2026-05-22):**
+- GreetingController owns the playback timer internally (not the main loop)
+- Timer threads are daemon (don't block shutdown)
+- FaceDetector guards against None/empty frames
+- Per-frame face center logged at DEBUG, not INFO
+- Sound duration read from WAV metadata at startup (stdlib wave module), not hardcoded
+- README uses package-only format (no Hugging Face Space frontmatter)
+
 **Tech Stack:** `reachy-mini` SDK, `opencv-python-headless`, Python `logging`
 
 ---

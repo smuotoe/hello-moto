@@ -1,26 +1,24 @@
-"""Face detection using OpenCV Haar cascade."""
-
-from pathlib import Path
-
-import cv2
-import cv2.data
+"""Face detection using MediaPipe Face Detection."""
 
 
 class FaceDetector:
-    """Detects faces using the default OpenCV Haar cascade.
+    """Detects faces using Google MediaPipe Face Detection.
 
-    Returns True if a face with bounding box >= 20x20 pixels is found.
+    Returns True if a face with confidence >= min_detection_confidence is found.
+    Uses model_selection=0 (short-range, best for faces <2m from camera).
     """
 
-    def __init__(self) -> None:
-        cascade_path = str(Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml")
-        self._cascade = cv2.CascadeClassifier(cascade_path)
-        if self._cascade.empty():
-            raise RuntimeError(f"Failed to load Haar cascade from {cascade_path}")
+    def __init__(self, min_detection_confidence: float = 0.5) -> None:
+        import mediapipe as mp
 
-    def _run_cascade(self, gray):
-        """Run the cascade on a grayscale frame (patchable for testing)."""
-        return self._cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+        self._detector = mp.solutions.face_detection.FaceDetection(
+            model_selection=0,
+            min_detection_confidence=min_detection_confidence,
+        )
+
+    def _run_mediapipe(self, rgb_frame):
+        """Run MediaPipe on an RGB frame (patchable for testing)."""
+        return self._detector.process(rgb_frame)
 
     def detect(self, frame):
         """Detect a face in a BGR frame from the camera.
@@ -30,21 +28,27 @@ class FaceDetector:
 
         Returns:
             (has_face, face_center_or_None). Face center is (x, y) in pixels.
-            Bounding box must be >= 20x20 to count.
         """
         # Guard against corrupt or missing frames
         if frame is None or frame.size == 0:
             return False, None
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = self._run_cascade(gray)
 
-        # Filter: bounding box must be >= 20x20
-        valid = [(x, y, w, h) for x, y, w, h in faces if w >= 20 and h >= 20]
-        if not valid:
+        # MediaPipe requires RGB input
+        import cv2
+
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = self._run_mediapipe(rgb)
+
+        if not results or not results.detections:
             return False, None
 
-        # Return the largest detected face
-        best = max(valid, key=lambda r: r[2] * r[3])
-        x, y, w, h = best
-        center = (x + w // 2, y + h // 2)
+        # Return the first detected face (highest confidence)
+        detection = results.detections[0]
+        bbox = detection.location_data.relative_bounding_box
+        h, w = frame.shape[:2]
+        x = int(bbox.xmin * w)
+        y = int(bbox.ymin * h)
+        cw = int(bbox.width * w)
+        ch = int(bbox.height * h)
+        center = (x + cw // 2, y + ch // 2)
         return True, center

@@ -1,4 +1,4 @@
-"""Tests for GreetingController."""
+"""Tests for GreetingController (single-frame trigger)."""
 
 import pytest
 
@@ -10,8 +10,8 @@ def controller():
     return GreetingController()
 
 
-def test_requires_five_consecutive_frames(controller):
-    """Five consecutive face detections should trigger a greeting."""
+def test_single_frame_triggers_greeting(controller):
+    """A single face detection should immediately trigger a greeting."""
     triggered = False
 
     def on_greet():
@@ -19,19 +19,12 @@ def test_requires_five_consecutive_frames(controller):
         triggered = True
 
     controller.set_on_greet(on_greet)
-
-    # 4 frames — should NOT trigger
-    for _ in range(4):
-        controller.update(has_face=True)
-    assert triggered is False
-
-    # 5th frame — SHOULD trigger
     controller.update(has_face=True)
     assert triggered is True
 
 
-def test_counter_resets_on_face_loss(controller):
-    """Counter resets to 0 when face disappears mid-sequence."""
+def test_no_face_does_not_trigger(controller):
+    """No face detection should not trigger anything."""
     triggered = False
 
     def on_greet():
@@ -39,19 +32,32 @@ def test_counter_resets_on_face_loss(controller):
         triggered = True
 
     controller.set_on_greet(on_greet)
-
-    for _ in range(3):
-        controller.update(has_face=True)
     controller.update(has_face=False)
-    for _ in range(4):
-        controller.update(has_face=True)
     assert triggered is False
 
+
+def test_playing_state_ignores_faces(controller):
+    """During playback (playing state), face detections should be ignored."""
+    triggered_count = 0
+
+    def on_greet():
+        nonlocal triggered_count
+        triggered_count += 1
+
+    controller.set_on_greet(on_greet)
+
+    # First face triggers the greeting
     controller.update(has_face=True)
-    assert triggered is True
+    assert triggered_count == 1
+    assert controller._state == "playing"
+
+    # Faces during playing should be ignored
+    controller.update(has_face=True)
+    controller.update(has_face=True)
+    assert triggered_count == 1  # Still only one
 
 
-def test_cooldown_blocks_during_period(controller, monkeypatch):
+def test_cooldown_blocks_during_period(controller):
     """During cooldown, face detections are ignored until timer expires."""
     triggered_count = 0
 
@@ -62,8 +68,7 @@ def test_cooldown_blocks_during_period(controller, monkeypatch):
     controller.set_on_greet(on_greet)
 
     # Trigger one greeting
-    for _ in range(5):
-        controller.update(has_face=True)
+    controller.update(has_face=True)
     assert triggered_count == 1
     assert controller._state == "playing"
 
@@ -71,14 +76,14 @@ def test_cooldown_blocks_during_period(controller, monkeypatch):
     controller.finish_playback()
     assert controller._state == "cooldown"
 
-    # Faces during cooldown should NOT trigger (cooldown not expired yet)
+    # Faces during cooldown should NOT trigger
     for _ in range(5):
         controller.update(has_face=True)
     assert triggered_count == 1  # Still only one
 
 
 def test_cooldown_expires(controller, monkeypatch):
-    """After cooldown period, detection resumes from fresh."""
+    """After cooldown period, detection resumes."""
     triggered_count = 0
 
     def on_greet():
@@ -88,8 +93,7 @@ def test_cooldown_expires(controller, monkeypatch):
     controller.set_on_greet(on_greet)
 
     # Trigger one greeting
-    for _ in range(5):
-        controller.update(has_face=True)
+    controller.update(has_face=True)
     controller.finish_playback()
 
     # Fake time: cooldown expired
@@ -98,7 +102,6 @@ def test_cooldown_expires(controller, monkeypatch):
         lambda: controller._cooldown_start + 3.0,
     )
 
-    # Now 5 faces should trigger again
-    for _ in range(5):
-        controller.update(has_face=True)
+    # Now a single face should trigger again
+    controller.update(has_face=True)
     assert triggered_count == 2
