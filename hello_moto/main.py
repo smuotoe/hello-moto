@@ -10,7 +10,7 @@ from hello_moto.face_detector import FaceDetector
 from hello_moto.greeting_controller import GreetingController
 
 if TYPE_CHECKING:
-    from reachy_mini import ReachyMini, ReachyMiniApp
+    from reachy_mini import ReachyMini
 
 logger = logging.getLogger("reachy_mini.app")
 
@@ -18,7 +18,6 @@ logger = logging.getLogger("reachy_mini.app")
 class HelloMotoApp:
     """Says Hello Moto when it sees a face."""
 
-    # Base class ReachyMiniApp is resolved at runtime via lazy import in run()
     def _get_sound_path(self) -> Path:
         """Resolve the bundled WAV file to an absolute path."""
         base = Path(__file__).resolve().parent
@@ -35,13 +34,6 @@ class HelloMotoApp:
 
     def run(self, reachy_mini, stop_event: threading.Event) -> None:
         logger.info("Hello Moto app starting...")
-
-        # Lazy import: reachy_mini only available on CM4
-        from reachy_mini import ReachyMini, ReachyMiniApp
-
-        # Verify we're a proper ReachyMiniApp subclass
-        if not isinstance(self, ReachyMiniApp):
-            HelloMotoApp.__bases__ = (ReachyMiniApp,)
 
         # Load face detector (fails fast if cascade unavailable)
         detector = FaceDetector()
