@@ -102,6 +102,10 @@ def test_cooldown_expires(controller, monkeypatch):
         lambda: controller._cooldown_start + 3.0,
     )
 
-    # Now a single face should trigger again
+    # First call: cooldown expired, resets state to idle without processing the frame
+    controller.update(has_face=True)
+    assert triggered_count == 1
+
+    # Second call: state is idle, face is present → triggers a new greeting
     controller.update(has_face=True)
     assert triggered_count == 2
